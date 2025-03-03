@@ -23,7 +23,7 @@ const generateToken = (userId, res) => {
     });
 
     // Log success message
-    logger.info(`JWT generated for user: ${userId}`);
+    // logger.info(`JWT generated for user: ${userId}`);
 
     return token;
   } catch (error) {

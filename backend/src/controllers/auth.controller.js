@@ -10,7 +10,7 @@ export const signup = async (req, res) => {
 
   try {
     if (!fullName || !email || !password) {
-      logger.warn("⚠️ Missing required fields");
+      logger.warn("Missing required fields");
       return res.status(400).json({ message: "All fields are required" });
     }
 
@@ -25,7 +25,7 @@ export const signup = async (req, res) => {
     // Prevent duplicate emails
     const user = await User.findOne({ email });
     if (user) {
-      logger.warn("⚠️ Email already exists");
+      logger.warn("Email already exists");
       return res.status(400).json({ message: "Email already exists" });
     }
 
@@ -39,6 +39,9 @@ export const signup = async (req, res) => {
       email,
       password: hashedPassword,
     });
+
+    // Save user to the database
+    await newUser.save();
 
     if (newUser) {
       // Generate JWT token
