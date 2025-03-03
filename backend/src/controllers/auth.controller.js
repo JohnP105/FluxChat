@@ -1,13 +1,13 @@
-import generateToken from "../lib/utils.js";
+import generateToken, { FLUXCHAT_COOKIE } from "../lib/utils.js";
 import logger from "../lib/logger.js";
 import User from "../models/user.model.js";
 
 import bcrypt from "bcryptjs";
 
 export const signup = async (req, res) => {
-  const { email, fullName, password } = req.body;
   logger.debug("--User signing up");
 
+  const { email, fullName, password } = req.body;
   try {
     if (!fullName || !email || !password) {
       logger.warn("Missing required fields");
@@ -44,7 +44,7 @@ export const signup = async (req, res) => {
     await newUser.save();
 
     if (newUser) {
-      // Generate JWT token
+      // Generate JWT token and send user back to client
       generateToken(newUser._id, res);
       logger.success("User registered successfully");
 
@@ -64,12 +64,69 @@ export const signup = async (req, res) => {
   }
 };
 
-export const login = (req, res) => {
+export const login = async (req, res) => {
   logger.debug("--User logging in");
-  res.send("login route");
+
+  const { email, password } = req.body;
+  try {
+    // Check if user exists in database
+    const user = await User.findOne({ email });
+    if (!user) {
+      logger.error("Invalid email");
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
+    }
+
+    // Check if password is correct
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      logger.error("Invalid password");
+      return res.status(400).json({
+        message: "Invalid credentials",
+      });
+    }
+
+    // Generate JWT token and send user back to client
+    generateToken(user._id, res);
+    res.status(201).json({
+      _id: user._id,
+      email: user.email,
+      fullName: user.fullName,
+      profilePic: user.profilePic,
+    });
+  } catch (error) {
+    logger.error(`Error in login controller: ${error.message}`);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 
 export const logout = (req, res) => {
   logger.debug("--User logging out");
-  res.send("logout route");
+
+  try {
+    // Remove cookie
+    res.cookie(FLUXCHAT_COOKIE, "", {
+      maxAge: 0,
+    });
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    logger.error(`Error in logout controller: ${error.message}`);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const updateProfile = async (req, res) => {
+  logger.debug("--User logging out");
+
+  try {
+    // Remove cookie
+    res.cookie(FLUXCHAT_COOKIE, "", {
+      maxAge: 0,
+    });
+    res.status(200).json({ message: "Logged out successfully" });
+  } catch (error) {
+    logger.error(`Error in logout controller: ${error.message}`);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };

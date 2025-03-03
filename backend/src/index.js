@@ -1,5 +1,6 @@
 import express from "express";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 
 import authRoutes from "./routes/auth.route.js";
 import { connectDB } from "./lib/db.js";
@@ -10,10 +11,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT;
 
-// Middleware to parse incoming JSON requests
-app.use(express.json());
+// Middlewares
+app.use(express.json()); // parse incoming JSON requests
+app.use(cookieParser()); // parse cookies
 
-// Set up authentication routes with "/api/auth" as the base URL
+// Routes
 app.use("/api/auth", authRoutes);
 
 // Start the server and establish database connection

@@ -1,6 +1,8 @@
 import jwt from "jsonwebtoken";
 import logger from "./logger.js";
 
+export const FLUXCHAT_COOKIE = "fluxchat_jwt";
+
 /**
  * Generates a JWT token and stores it in a secure HTTP-only cookie.
  * @param {string} userId - The user's unique ID.
@@ -15,7 +17,7 @@ const generateToken = (userId, res) => {
     });
 
     // Store the token in a secure HTTP-only cookie
-    res.cookie("fluxchat_jwt", token, {
+    res.cookie(FLUXCHAT_COOKIE, token, {
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days in milliseconds
       httpOnly: true, // Prevents XSS attacks (JavaScript can't access the cookie)
       sameSite: "strict", // Prevents CSRF attacks
